@@ -44,6 +44,13 @@ def test_variants_count():
     eq_(3, len(a))
     
     
+def test_variants_exclude_fields():
+    a = variants('sample.vcf', exclude_fields=['ID', 'FILTER'])
+    assert 'CHROM' in a.dtype.names
+    assert 'ID' not in a.dtype.names
+    assert 'FILTER' not in a.dtype.names
+    
+    
 def test_info():
     a = info('sample.vcf', arities={'AC': 2})
     print repr(a)

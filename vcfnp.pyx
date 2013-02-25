@@ -147,6 +147,7 @@ cdef string FIELD_NAME_GT = 'GT'
 def variants(filename,                  # name of VCF file
              region=None,               # region to extract
              fields=None,               # fields to extract
+             exclude_fields=None,       # fields not to extract
              dtypes=None,               # override default dtypes
              arities=None,              # override how many values to expect
              fills=None,                # override default fill values
@@ -185,6 +186,10 @@ def variants(filename,                  # name of VCF file
     else:
         for f in fields:
             assert f in VARIANT_FIELDS, 'unknown field: %s' % f
+            
+    # exclude fields
+    if exclude_fields is not None:
+        fields = [f for f in fields if f not in exclude_fields]
     
     # determine a numpy dtype for each field
     if dtypes is None:
@@ -370,6 +375,7 @@ cdef inline object _is_snp(Variant *var):
 def info(filename,                  # name of VCF file
          region=None,               # region to extract
          fields=None,               # INFO fields to extract
+         exclude_fields=None,       # fields not to extract
          dtypes=None,               # override default dtypes
          arities=None,              # override how many values to expect
          fills=None,                # override default fill values
@@ -408,7 +414,11 @@ def info(filename,                  # name of VCF file
     else:
         for f in fields:
             assert f in infoIds, 'unknown field: %s' % f
-    
+
+    # exclude fields
+    if exclude_fields is not None:
+        fields = [f for f in fields if f not in exclude_fields]
+        
     # determine a numpy dtype for each field
     if dtypes is None:
         dtypes = dict()
@@ -631,6 +641,7 @@ def calldata(filename,                  # name of VCF file
              samples=None,              # specify which samples to extract (default all)
              ploidy=2,                  # ploidy to assume
              fields=None,               # fields to extract
+             exclude_fields=None,       # fields not to extract
              dtypes=None,               # override default dtypes
              arities=None,              # override how many values to expect
              fills=None,                # override default fill values
@@ -687,7 +698,11 @@ def calldata(filename,                  # name of VCF file
     else:
         for f in fields:
             assert f in VARIANT_FIELDS or f in formatIds, 'unknown field: %s' % f
-    
+
+    # exclude fields
+    if exclude_fields is not None:
+        fields = [f for f in fields if f not in exclude_fields]
+        
     # determine a numpy dtype for each field
     if dtypes is None:
         dtypes = dict()

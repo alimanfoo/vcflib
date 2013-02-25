@@ -2,6 +2,17 @@ from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
 import os
+from ast import literal_eval
+
+
+
+def get_version(source='vcflib.pyx'):
+    with open(source) as f:
+        for line in f:
+            if line.startswith('__version__'):
+                return literal_eval(line.partition('=')[2].lstrip())
+    raise ValueError("__version__ not found")
+
 
 
 vcflib_dir = os.getcwd()
@@ -47,6 +58,7 @@ vcfnp_extension = Extension('vcfnp',
 
 setup(
     name = 'vcflib',
+    version=get_version(),
     cmdclass = {'build_ext': build_ext},
     ext_modules = [vcflib_extension, vcfnp_extension],
     )
