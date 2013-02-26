@@ -17,7 +17,7 @@ def test_metadata():
     vcf = PyVariantCallFile('sample.vcf')
     eq_(['NS', 'AN', 'AC', 'DP', 'AF', 'AA', 'DB', 'H2'], vcf.infoIds)
     eq_(['GT', 'GQ', 'DP', 'HQ'], vcf.formatIds)
-    eq_(['q10', 's50'], vcf.filterIds)
+    eq_(['s50', 'q10'], vcf.filterIds)
     eq_(TYPE_INTEGER, vcf.infoTypes['NS'])
     eq_(TYPE_FLOAT, vcf.infoTypes['AF'])
     eq_(TYPE_STRING, vcf.infoTypes['AA'])

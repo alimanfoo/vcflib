@@ -19,6 +19,8 @@ def test_variants():
     eq_('ATG', a[8]['ALT'][1])
     eq_(10.0, a[1]['QUAL'])
     eq_(True, a[2]['FILTER']['PASS'])
+    eq_(False, a[3]['FILTER']['PASS'])
+    eq_(True, a[3]['FILTER']['q10'])
     eq_(2, a[0]['num_alleles'])
     eq_(False, a[5]['is_snp'])
     
