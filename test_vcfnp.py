@@ -80,6 +80,8 @@ def test_calldata():
     eq_(True, a[0]['NA00001']['is_called'])
     eq_(True, a[0]['NA00001']['is_phased'])
     eq_((0, 0), tuple(a[0]['NA00001']['genotype']))
+    eq_((-1, -1), tuple(a[6]['NA00003']['genotype']))
+    eq_((-1, -1), tuple(a[7]['NA00003']['genotype']))
     eq_((10, 10), tuple(a[0]['NA00001']['HQ']))
 
 #>>> a['NA00001']

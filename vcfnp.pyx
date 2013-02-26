@@ -125,7 +125,7 @@ DEFAULT_SAMPLE_ARITY = {
 
 
 cdef char SEMICOLON = ';'
-cdef char DOT = '.'
+cdef string DOT = '.'
 cdef string GT_DELIMS = '/|'
 cdef string FIELD_NAME_CHROM = 'CHROM'
 cdef string FIELD_NAME_POS = 'POS'
@@ -875,13 +875,19 @@ cdef inline object _genotype(map[string, vector[string]]& sample_data, int ploid
         split(gts.at(0), GT_DELIMS, allele_strings)
         if ploidy == 1:
             if allele_strings.size() > 0:
-                return atoi(allele_strings.at(0).c_str())
+                if allele_strings.at(0) == DOT:
+                    return -1
+                else:
+                    return atoi(allele_strings.at(0).c_str())
             else:
                 return -1
         else:
             for i in range(ploidy):
                 if i < allele_strings.size():
-                    alleles.push_back(atoi(allele_strings.at(i).c_str()))
+                    if allele_strings.at(i) == DOT:
+                        alleles.push_back(-1)
+                    else:
+                        alleles.push_back(atoi(allele_strings.at(i).c_str()))
                 else:
                     alleles.push_back(-1)
             return tuple(alleles)
