@@ -18,6 +18,7 @@ from libc.stdlib cimport atoi, atof
 from cython.operator cimport dereference as deref
 import sys
 import time
+from itertools import islice
 #from cython.view cimport array as cvarray
 
 cdef size_t npos = -1
@@ -153,7 +154,8 @@ def variants(filename,                  # name of VCF file
              fills=None,                # override default fill values
              count=None,                # attempt to extract exactly this many records
              progress=0,                # if >0 log progress
-             logstream=sys.stderr       # stream for logging progress
+             logstream=sys.stderr,      # stream for logging progress
+             slice=None                 # slice the underlying iterator
              ):
     """
     Load an numpy structured array with data from the fixed fields of a VCF file 
@@ -233,6 +235,10 @@ def variants(filename,                  # name of VCF file
             
     # set up iterator
     it = _itervariants(filename, region, fields, arities, fills)
+    
+    # slice?
+    if slice:
+        it = islice(it, *slice)
     
     # build an array from the iterator
     return _fromiter(it, dtype, count, progress, logstream)
@@ -381,7 +387,8 @@ def info(filename,                  # name of VCF file
          fills=None,                # override default fill values
          count=None,                # attempt to extract exactly this many records
          progress=0,                # if >0 log progress
-         logstream=sys.stderr       # stream for logging progress
+         logstream=sys.stderr,      # stream for logging progress
+         slice=None                 # slice the underlying iterator
          ):
     """
     Load a numpy structured array with data from the INFO field of a VCF file. 
@@ -466,7 +473,11 @@ def info(filename,                  # name of VCF file
             
     # set up iterator
     it = _iterinfo(filename, region, fields, arities, fills)
-    
+
+    # slice?
+    if slice:
+        it = islice(it, *slice)
+        
     # build an array from the iterator
     return _fromiter(it, dtype, count, progress, logstream)
 
@@ -647,7 +658,8 @@ def calldata(filename,                  # name of VCF file
              fills=None,                # override default fill values
              count=None,                # attempt to extract exactly this many records
              progress=0,                # if >0 log progress
-             logstream=sys.stderr       # stream for logging progress
+             logstream=sys.stderr,      # stream for logging progress
+             slice=None                 # slice the underlying iterator
              ):
     """
     Load a numpy structured array with data from the sample columns of a VCF
@@ -768,7 +780,11 @@ def calldata(filename,                  # name of VCF file
             
     # set up iterator
     it = _itercalldata(filename, region, samples, ploidy, fields, arities, fills)
-    
+
+    # slice?
+    if slice:
+        it = islice(it, *slice)
+        
     # build an array from the iterator
     return _fromiter(it, dtype, count, progress, logstream)
 

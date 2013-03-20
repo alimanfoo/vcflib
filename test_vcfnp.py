@@ -53,6 +53,13 @@ def test_variants_exclude_fields():
     assert 'FILTER' not in a.dtype.names
     
     
+def test_variants_slice():
+    a = variants('sample.vcf.gz')
+    eq_('rs6054257', a['ID'][2])
+    a = variants('sample.vcf.gz', slice=(0, None, 2))
+    eq_('rs6054257', a['ID'][1])
+    
+    
 def test_info():
     a = info('sample.vcf', arities={'AC': 2})
     print repr(a)
