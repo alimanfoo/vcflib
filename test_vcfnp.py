@@ -103,3 +103,16 @@ def test_calldata():
 #       (True, False, [0, -1], '0', 0, 0, [0, 0])], 
 #      dtype=[('is_called', '|b1'), ('is_phased', '|b1'), ('genotype', '|i1', (2,)), ('GT', '|S3'), ('GQ', '|u1'), ('DP', '<u2'), ('HQ', '<i4', (2,))])
     
+    
+def test_condition():
+    v = variants('sample.vcf')
+    eq_(9, len(v))
+    c = calldata('sample.vcf', condition=v['FILTER']['PASS'])
+    eq_(5, len(c))
+    i = info('sample.vcf', condition=v['FILTER']['PASS'])
+    eq_(5, len(i))
+    vf = variants('sample.vcf', condition=v['FILTER']['PASS'])
+    eq_(5, len(vf))
+    
+
+    

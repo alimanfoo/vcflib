@@ -156,6 +156,7 @@ def variants(filename,                  # name of VCF file
              count=None,                # attempt to extract exactly this many records
              progress=0,                # if >0 log progress
              logstream=sys.stderr,      # stream for logging progress
+             condition=None,            # boolean array defining which rows to load
              slice=None                 # slice the underlying iterator
              ):
     """
@@ -238,7 +239,10 @@ def variants(filename,                  # name of VCF file
             dtype.append((f, t, (n,)))
             
     # set up iterator
-    it = _itervariants(filename, region, fields, arities, fills)
+    if condition is not None:
+        it = _itervariants_with_condition(filename, region, fields, arities, fills, condition)
+    else:
+        it = _itervariants(filename, region, fields, arities, fills)
     
     # slice?
     if slice:
@@ -295,6 +299,36 @@ def _itervariants(filename,
 
     while _get_next_variant(variantFile, var):
         yield _mkvvals(var, fields, arities, fills, filterIds)
+        
+    del variantFile
+    del var
+    
+    
+def _itervariants_with_condition(filename, 
+                                 region,
+                                 vector[string] fields, 
+                                 map[string, int] arities,
+                                 dict fills,
+                                 condition):
+    cdef VariantCallFile *variantFile
+    cdef Variant *var
+    cdef vector[string] filterIds
+    cdef int i = 0
+    cdef int n = len(condition)
+    
+    variantFile = new VariantCallFile()
+    variantFile.open(filename)
+    variantFile.parseSamples = False
+    if region is not None:
+        variantFile.setRegion(region)
+    var = new Variant(deref(variantFile))
+    filterIds = <list>variantFile.filterIds()
+    filterIds = ['PASS'] + sorted(filterIds)
+
+    while i < n and _get_next_variant(variantFile, var):
+        if condition[i]:
+            yield _mkvvals(var, fields, arities, fills, filterIds)
+        i += 1
         
     del variantFile
     del var
@@ -392,7 +426,8 @@ def info(filename,                  # name of VCF file
          count=None,                # attempt to extract exactly this many records
          progress=0,                # if >0 log progress
          logstream=sys.stderr,      # stream for logging progress
-         slice=None                 # slice the underlying iterator
+         condition=None,            # boolean array defining which rows to load
+         slice=None,                # slice the underlying iterator
          ):
     """
     Load a numpy structured array with data from the INFO field of a VCF file. 
@@ -479,7 +514,10 @@ def info(filename,                  # name of VCF file
             dtype.append((f, t, (n,)))
             
     # set up iterator
-    it = _iterinfo(filename, region, fields, arities, fills)
+    if condition is not None:
+        it = _iterinfo_with_condition(filename, region, fields, arities, fills, condition)
+    else:
+        it = _iterinfo(filename, region, fields, arities, fills)
 
     # slice?
     if slice:
@@ -507,6 +545,33 @@ def _iterinfo(filename,
 
     while _get_next_variant(variantFile, var):
         yield _mkivals(var, fields, arities, fills, variantFile.infoTypes)
+        
+    del variantFile
+    del var
+
+    
+def _iterinfo_with_condition(filename, 
+                             region,
+                             vector[string] fields, 
+                             map[string, int] arities,
+                             dict fills,
+                             condition):
+    cdef VariantCallFile *variantFile
+    cdef Variant *var
+    cdef int i = 0
+    cdef int n = len(condition)
+
+    variantFile = new VariantCallFile()
+    variantFile.open(filename)
+    variantFile.parseSamples = False
+    if region is not None:
+        variantFile.setRegion(region)
+    var = new Variant(deref(variantFile))
+
+    while i < n and _get_next_variant(variantFile, var):
+        if condition[i]:
+            yield _mkivals(var, fields, arities, fills, variantFile.infoTypes)
+        i += 1
         
     del variantFile
     del var
@@ -666,7 +731,8 @@ def calldata(filename,                  # name of VCF file
              count=None,                # attempt to extract exactly this many records
              progress=0,                # if >0 log progress
              logstream=sys.stderr,      # stream for logging progress
-             slice=None                 # slice the underlying iterator
+             condition=None,            # boolean array defining which rows to load
+             slice=None,                # slice the underlying iterator
              ):
     """
     Load a numpy structured array with data from the sample columns of a VCF
@@ -789,7 +855,10 @@ def calldata(filename,                  # name of VCF file
     dtype = [(s, cell_dtype) for s in samples]
             
     # set up iterator
-    it = _itercalldata(filename, region, samples, ploidy, fields, arities, fills)
+    if condition is not None:
+        it = _itercalldata_with_condition(filename, region, samples, ploidy, fields, arities, fills, condition)
+    else:
+        it = _itercalldata(filename, region, samples, ploidy, fields, arities, fills)
 
     # slice?
     if slice:
@@ -819,6 +888,46 @@ def _itercalldata(filename,
 
     while _get_next_variant(variantFile, var):
         yield _mkssvals(var, samples, ploidy, fields, arities, fills, variantFile.formatTypes)
+#        out = [_mksvals(var, s, ploidy, fields, arities, fills, variantFile.formatTypes) for s in samples]
+#        yield tuple(out)
+        
+    del variantFile
+    del var
+    
+    
+def _itercalldata_with_condition(filename, 
+                                 region,
+                                 vector[string] samples,
+                                 int ploidy,
+                                 vector[string] fields, 
+                                 map[string, int] arities,
+                                 dict fills,
+                                 condition,
+                                 ):
+    cdef VariantCallFile *variantFile
+    cdef Variant *var
+    cdef int i = 0
+    cdef int n = len(condition)
+    
+    variantFile = new VariantCallFile()
+    variantFile.open(filename)
+    variantFile.parseSamples = False
+    if region is not None:
+        variantFile.setRegion(region)
+    var = new Variant(deref(variantFile))
+
+    while i < n:
+        # only both parsing samples if we know we want the variant
+        if condition[i]:
+            variantFile.parseSamples = True
+            if not _get_next_variant(variantFile, var):
+                break
+            yield _mkssvals(var, samples, ploidy, fields, arities, fills, variantFile.formatTypes)
+        else:
+            variantFile.parseSamples = False
+            if not _get_next_variant(variantFile, var):
+                break
+        i += 1
 #        out = [_mksvals(var, s, ploidy, fields, arities, fills, variantFile.formatTypes) for s in samples]
 #        yield tuple(out)
         
