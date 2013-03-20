@@ -19,6 +19,7 @@ from cython.operator cimport dereference as deref
 import sys
 import time
 from itertools import islice
+import os
 #from cython.view cimport array as cvarray
 
 cdef size_t npos = -1
@@ -181,6 +182,9 @@ def variants(filename,                  # name of VCF file
         array([False, False,  True, False,  True,  True,  True, False,  True], dtype=bool)
 
     """
+    
+    if not os.path.exists(filename):
+        raise Exception('file not found: %s' % filename)
     
     # determine fields to extract
     if fields is None:
@@ -409,6 +413,9 @@ def info(filename,                  # name of VCF file
               dtype=[('NS', '<i4'), ('AN', '<u2'), ('AC', '<u2'), ('DP', '<i4'), ('AF', '<f4'), ('AA', '|S12'), ('DB', '|b1'), ('H2', '|b1')])
     
     """
+    
+    if not os.path.exists(filename):
+        raise Exception('file not found: %s' % filename)
     
     vcf = PyVariantCallFile(filename)
     infoIds = vcf.infoIds
@@ -691,6 +698,9 @@ def calldata(filename,                  # name of VCF file
               dtype=[('is_called', '|b1'), ('is_phased', '|b1'), ('genotype', '|i1', (2,)), ('GT', '|S3'), ('GQ', '|u1'), ('DP', '<u2'), ('HQ', '<i4', (2,))])
     
     """
+    
+    if not os.path.exists(filename):
+        raise Exception('file not found: %s' % filename)
     
     vcf = PyVariantCallFile(filename)
     formatIds = vcf.formatIds
