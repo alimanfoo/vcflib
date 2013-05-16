@@ -295,8 +295,8 @@ VariantFieldType Variant::infoType(string& key) {
 
     bool Variant::getSampleValueBool(string& key, string& sample, int index) {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
-        if (s == vcf->infoTypes.end()) {
-            cerr << "no info field " << key << endl;
+        if (s == vcf->formatTypes.end()) {
+            cerr << "no format field " << key << endl;
             exit(1);
         } else {
             int count = vcf->formatCounts[key];
@@ -328,8 +328,8 @@ VariantFieldType Variant::infoType(string& key) {
 
     string Variant::getSampleValueString(string& key, string& sample, int index) {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
-        if (s == vcf->infoTypes.end()) {
-            cerr << "no info field " << key << endl;
+        if (s == vcf->formatTypes.end()) {
+            cerr << "no format field " << key << endl;
             exit(1);
         } else {
             int count = vcf->formatCounts[key];
@@ -362,8 +362,8 @@ VariantFieldType Variant::infoType(string& key) {
 
     double Variant::getSampleValueFloat(string& key, string& sample, int index) {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
-        if (s == vcf->infoTypes.end()) {
-            cerr << "no info field " << key << endl;
+        if (s == vcf->formatTypes.end()) {
+            cerr << "no format field " << key << endl;
             exit(1);
         } else {
             // XXX TODO wrap this with a function call
