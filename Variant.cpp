@@ -64,26 +64,31 @@ void Variant::parse(string& line, bool parseSamples) {
         vector<string>::iterator sample = fields.begin() + 9;
         for (; sample != fields.end() && sampleName != sampleNames.end(); ++sample, ++sampleName) {
             string& name = *sampleName;
-            if (*sample == "." || *sample == "./.") {
-                samples.erase(name);
-                continue;
-            }
+//            if (*sample == "." || *sample == "./.") {
+//                samples.erase(name);
+//                continue;
+//            }
             vector<string> samplefields = split(*sample, ':');
             vector<string>::iterator i = samplefields.begin();
-            if (samplefields.size() != format.size()) {
-                // ignore this case... malformed (or 'null') sample specs are caught above
-                // /*
-                // cerr << "inconsistent number of fields for sample " << name << endl
-                //      << "format is " << join(format, ":") << endl
-                //      << "sample is " << *sample << endl;
-                // exit(1);
-                // *
-            }
-            else {
-                for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
-                    samples[name][*f] = split(*i, ','); ++i;
-                }
-            }
+//            if (samplefields.size() != format.size()) {
+//                // ignore this case... malformed (or 'null') sample specs are caught above
+//                // /*
+//                // cerr << "inconsistent number of fields for sample " << name << endl
+//                //      << "format is " << join(format, ":") << endl
+//                //      << "sample is " << *sample << endl;
+//                // exit(1);
+//                // *
+//            }
+//            else {
+//                for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
+//                    samples[name][*f] = split(*i, ','); ++i;
+//                }
+//            }
+            // allow sample with trailing fields missing
+			for (vector<string>::iterator f = format.begin(); f != format.end() && i != samplefields.end(); ++f) {
+				samples[name][*f] = split(*i, ','); ++i;
+			}
+
         }
         if (sampleName != sampleNames.end()) {
             cerr << "error: more sample names in header than sample fields" << endl;
