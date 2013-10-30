@@ -2,7 +2,7 @@
 
 namespace vcf {
 
-void Variant::parse(string& line, bool parseSamples) {
+void Variant::parse(string& line, bool parseInfo, bool parseSamples) {
 
     // clean up potentially variable data structures
     info.clear();
@@ -37,7 +37,8 @@ void Variant::parse(string& line, bool parseSamples) {
 
     convert(fields.at(5), quality);
     filter = fields.at(6);
-    if (fields.size() > 7) {
+
+    if (parseInfo && fields.size() > 7) {
         vector<string> infofields = split(fields.at(7), ';');
         for (vector<string>::iterator f = infofields.begin(); f != infofields.end(); ++f) {
             if (*f == ".") {
@@ -51,6 +52,7 @@ void Variant::parse(string& line, bool parseSamples) {
             }
         }
     }
+
     // check if we have samples specified
     // and that we are supposed to parse them
     if (parseSamples && fields.size() > 8) {
@@ -1203,7 +1205,7 @@ bool VariantCallFile::parseHeader(string& hs) {
     bool VariantCallFile::getNextVariant(Variant& var) {
         if (firstRecord && !justSetRegion) {
             if (!line.empty()) {
-                var.parse(line, parseSamples);
+                var.parse(line, parseInfo, parseSamples);
                 firstRecord = false;
                 _done = false;
                 return true;
@@ -1216,13 +1218,13 @@ bool VariantCallFile::parseHeader(string& hs) {
                 if (firstRecord) {
                     firstRecord = false;
                 }
-                var.parse(line, parseSamples);
+                var.parse(line, parseInfo, parseSamples);
                 line.clear();
                 justSetRegion = false;
                 _done = false;
                 return true;
             } else if (tabixFile->getNextLine(line)) {
-                var.parse(line, parseSamples);
+                var.parse(line, parseInfo, parseSamples);
                 _done = false;
                 return true;
             } else {
@@ -1231,7 +1233,7 @@ bool VariantCallFile::parseHeader(string& hs) {
             }
         } else {
             if (std::getline(*file, line)) {
-                var.parse(line, parseSamples);
+                var.parse(line, parseInfo, parseSamples);
                 _done = false;
                 return true;
             } else {

@@ -69,6 +69,7 @@ public:
     map<string, VariantFieldType> formatTypes;
     map<string, int> formatCounts;
     vector<string> sampleNames;
+    bool parseInfo;
     bool parseSamples;
     bool _done;
 
@@ -120,7 +121,7 @@ public:
         return parsedHeader;
     }
 
-VariantCallFile(void) : usingTabix(false), parseSamples(true), justSetRegion(false), parsedHeader(false) { }
+VariantCallFile(void) : usingTabix(false), parseInfo(true), parseSamples(true), justSetRegion(false), parsedHeader(false) { }
     ~VariantCallFile(void) {
         if (usingTabix) {
             delete tabixFile;
@@ -235,7 +236,7 @@ public:
     void setVariantCallFile(VariantCallFile& v);
     void setVariantCallFile(VariantCallFile* v);
 
-    void parse(string& line, bool parseSamples = true);
+    void parse(string& line, bool parseInfo = true, bool parseSamples = true);
     void addFilter(string& tag);
     bool getValueBool(string& key, string& sample, int index = INDEX_NONE);
     double getValueFloat(string& key, string& sample, int index = INDEX_NONE);
