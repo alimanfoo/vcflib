@@ -10,6 +10,7 @@ void Variant::parse(string& line, bool parseInfo, bool parseSamples) {
     format.clear();
     alt.clear();
     alleles.clear();
+    samples.clear();
 
     // #CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT [SAMPLE1 .. SAMPLEN]
     vector<string> fields = split(line, '\t');
@@ -57,35 +58,12 @@ void Variant::parse(string& line, bool parseInfo, bool parseSamples) {
     // and that we are supposed to parse them
     if (parseSamples && fields.size() > 8) {
         format = split(fields.at(8), ':');
-        // if the format changed, we have to rebuild the samples
-        if (fields.at(8) != lastFormat) {
-            samples.clear();
-            lastFormat = fields.at(8);
-        }
         vector<string>::iterator sampleName = sampleNames.begin();
         vector<string>::iterator sample = fields.begin() + 9;
         for (; sample != fields.end() && sampleName != sampleNames.end(); ++sample, ++sampleName) {
             string& name = *sampleName;
-//            if (*sample == "." || *sample == "./.") {
-//                samples.erase(name);
-//                continue;
-//            }
             vector<string> samplefields = split(*sample, ':');
             vector<string>::iterator i = samplefields.begin();
-//            if (samplefields.size() != format.size()) {
-//                // ignore this case... malformed (or 'null') sample specs are caught above
-//                // /*
-//                // cerr << "inconsistent number of fields for sample " << name << endl
-//                //      << "format is " << join(format, ":") << endl
-//                //      << "sample is " << *sample << endl;
-//                // exit(1);
-//                // *
-//            }
-//            else {
-//                for (vector<string>::iterator f = format.begin(); f != format.end(); ++f) {
-//                    samples[name][*f] = split(*i, ','); ++i;
-//                }
-//            }
             // allow sample with trailing fields missing
 			for (vector<string>::iterator f = format.begin(); f != format.end() && i != samplefields.end(); ++f) {
 				samples[name][*f] = split(*i, ','); ++i;
