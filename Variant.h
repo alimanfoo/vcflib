@@ -13,6 +13,7 @@
 #include <stack>
 #include <queue>
 #include <set>
+#include <stdexcept>
 #include "split.h"
 #include "join.h"
 #include "tabixpp/tabix.hpp"

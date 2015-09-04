@@ -1071,8 +1071,7 @@ bool VariantCallFile::parseHeader(void) {
     if (usingTabix) {
         tabixFile->getHeader(headerStr);
         if (headerStr.empty()) {
-            cerr << "error: no VCF header" << endl;
-            exit(1);
+            throw std::runtime_error("no VCF header");
         }
         tabixFile->getNextLine(line);
         firstRecord = true;
@@ -1083,8 +1082,7 @@ bool VariantCallFile::parseHeader(void) {
             } else {
                 // done with header
                 if (headerStr.empty()) {
-                    cerr << "error: no VCF header" << endl;
-                    exit(1);
+                    throw std::runtime_error("no VCF header");
                 }
                 firstRecord = true;
                 break;
