@@ -71,16 +71,18 @@ void Variant::parse(string& line, bool parseInfo, bool parseSamples) {
 
         }
         if (sampleName != sampleNames.end()) {
-            cerr << "error: more sample names in header than sample fields" << endl;
-            cerr << "samples: " << join(sampleNames, " ") << endl;
-            cerr << "line: " << line << endl;
-            exit(1);
+            std::ostringstream merr;
+            merr << "error: more sample names in header than sample fields" << endl;
+            merr << "samples: " << join(sampleNames, " ") << endl;
+            merr << "line: " << line << endl;
+            throw std::runtime_error(merr.str());
         }
         if (sample != fields.end()) {
-            cerr << "error: more sample fields than samples listed in header" << endl;
-            cerr << "samples: " << join(sampleNames, " ") << endl;
-            cerr << "line: " << line << endl;
-            exit(1);
+            std::ostringstream merr;
+            merr << "error: more sample fields than samples listed in header" << endl;
+            merr << "samples: " << join(sampleNames, " ") << endl;
+            merr << "line: " << line << endl;
+            throw std::runtime_error(merr.str());
         }
     }
 
@@ -140,8 +142,9 @@ VariantFieldType Variant::infoType(string& key) {
         if (key == "QUAL") { // hack to use QUAL as an "info" field
             return FIELD_INTEGER;
         }
-        cerr << "no info field " << key << endl;
-        exit(1);
+        std::ostringstream merr;
+        merr << "no info field " << key << endl;
+        throw std::runtime_error(merr.str());
     } else {
         return s->second;
     }
@@ -150,8 +153,9 @@ VariantFieldType Variant::infoType(string& key) {
     VariantFieldType Variant::formatType(string& key) {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
         if (s == vcf->formatTypes.end()) {
-            cerr << "no format field " << key << endl;
-            exit(1);
+            std::ostringstream merr;
+            merr << "no format field " << key << endl;
+            throw std::runtime_error(merr.str());
         } else {
             return s->second;
         }
@@ -160,8 +164,9 @@ VariantFieldType Variant::infoType(string& key) {
     bool Variant::getInfoValueBool(string& key, int index) {
         map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
         if (s == vcf->infoTypes.end()) {
-            cerr << "no info field " << key << endl;
-            exit(1);
+            std::ostringstream merr;
+            merr << "no info field " << key << endl;
+            throw std::runtime_error(merr.str());
         } else {
             int count = vcf->infoCounts[key];
             // XXX TODO, fix for Genotype variants...
@@ -170,8 +175,9 @@ VariantFieldType Variant::infoType(string& key) {
             }
             if (index == INDEX_NONE) {
                 if (count != 1) {
-                    cerr << "no field index supplied and field count != 1" << endl;
-                    exit(1);
+                    std::ostringstream merr;
+                    merr << "no field index supplied and field count != 1" << endl;
+                    throw std::runtime_error(merr.str());
                 } else {
                     index = 0;
                 }
@@ -184,7 +190,9 @@ VariantFieldType Variant::infoType(string& key) {
                 else
                     return true;
             } else {
-                cerr << "not flag type " << key << endl;
+                std::ostringstream merr;
+                merr << "not flag type " << key << endl;
+                throw std::runtime_error(merr.str());
             }
         }
     }
@@ -192,8 +200,9 @@ VariantFieldType Variant::infoType(string& key) {
     string Variant::getInfoValueString(string& key, int index) {
         map<string, VariantFieldType>::iterator s = vcf->infoTypes.find(key);
         if (s == vcf->infoTypes.end()) {
-            cerr << "no info field " << key << endl;
-            exit(1);
+            std::ostringstream merr;
+            merr << "no info field " << key << endl;
+            throw std::runtime_error(merr.str());
         } else {
             int count = vcf->infoCounts[key];
             // XXX TODO, fix for Genotype variants...
@@ -202,8 +211,9 @@ VariantFieldType Variant::infoType(string& key) {
             }
             if (index == INDEX_NONE) {
                 if (count != 1) {
-                    cerr << "no field index supplied and field count != 1" << endl;
-                    exit(1);
+                    std::ostringstream merr;
+                    merr << "no field index supplied and field count != 1" << endl;
+                    throw std::runtime_error(merr.str());
                 } else {
                     index = 0;
                 }
@@ -215,8 +225,9 @@ VariantFieldType Variant::infoType(string& key) {
                     return "";
                 return b->second.at(index);
             } else {
-                cerr << "not string type " << key << endl;
-                return "";
+                std::ostringstream merr;
+                merr << "not string type " << key << endl;
+                throw std::runtime_error(merr.str());
             }
         }
     }
@@ -227,8 +238,9 @@ VariantFieldType Variant::infoType(string& key) {
             if (key == "QUAL") {
                 return quality;
             }
-            cerr << "no info field " << key << endl;
-            exit(1);
+            std::ostringstream merr;
+            merr << "no info field " << key << endl;
+            throw std::runtime_error(merr.str());
         } else {
             int count = vcf->infoCounts[key];
             // XXX TODO, fix for Genotype variants...
@@ -237,8 +249,9 @@ VariantFieldType Variant::infoType(string& key) {
             }
             if (index == INDEX_NONE) {
                 if (count != 1) {
-                    cerr << "no field index supplied and field count != 1" << endl;
-                    exit(1);
+                    std::ostringstream merr;
+                    merr << "no field index supplied and field count != 1" << endl;
+                    throw std::runtime_error(merr.str());
                 } else {
                     index = 0;
                 }
@@ -250,13 +263,15 @@ VariantFieldType Variant::infoType(string& key) {
                     return false;
                 double r;
                 if (!convert(b->second.at(index), r)) {
-                    cerr << "could not convert field " << key << "=" << b->second.at(index) << " to " << type << endl;
-                    exit(1);
+                    std::ostringstream merr;
+                    merr << "could not convert field " << key << "=" << b->second.at(index) << " to " << type << endl;
+                    throw std::runtime_error(merr.str());
                 }
                 return r;
             } else {
-                cerr << "unsupported type for variant record " << type << endl;
-                exit(1);
+                std::ostringstream merr;
+                merr << "unsupported type for variant record " << type << endl;
+                throw std::runtime_error(merr.str());
             }
         }
     }
@@ -281,8 +296,9 @@ VariantFieldType Variant::infoType(string& key) {
     bool Variant::getSampleValueBool(string& key, string& sample, int index) {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
         if (s == vcf->formatTypes.end()) {
-            cerr << "no format field " << key << endl;
-            exit(1);
+            std::ostringstream merr;
+            merr << "no format field " << key << endl;
+            throw std::runtime_error(merr.str());
         } else {
             int count = vcf->formatCounts[key];
             // XXX TODO, fix for Genotype variants...
@@ -291,8 +307,9 @@ VariantFieldType Variant::infoType(string& key) {
             }
             if (index == INDEX_NONE) {
                 if (count != 1) {
-                    cerr << "no field index supplied and field count != 1" << endl;
-                    exit(1);
+                    std::ostringstream merr;
+                    merr << "no field index supplied and field count != 1" << endl;
+                    throw std::runtime_error(merr.str());
                 } else {
                     index = 0;
                 }
@@ -306,7 +323,9 @@ VariantFieldType Variant::infoType(string& key) {
                 else
                     return true;
             } else {
-                cerr << "not bool type " << key << endl;
+                std::ostringstream merr;
+                merr << "not bool type " << key << endl;
+                throw std::runtime_error(merr.str());
             }
         }
     }
@@ -314,8 +333,9 @@ VariantFieldType Variant::infoType(string& key) {
     string Variant::getSampleValueString(string& key, string& sample, int index) {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
         if (s == vcf->formatTypes.end()) {
-            cerr << "no format field " << key << endl;
-            exit(1);
+            std::ostringstream merr;
+            merr << "no format field " << key << endl;
+            throw std::runtime_error(merr.str());
         } else {
             int count = vcf->formatCounts[key];
             // XXX TODO, fix for Genotype variants...
@@ -324,8 +344,9 @@ VariantFieldType Variant::infoType(string& key) {
             }
             if (index == INDEX_NONE) {
                 if (count != 1) {
-                    cerr << "no field index supplied and field count != 1" << endl;
-                    exit(1);
+                    std::ostringstream merr;
+                    merr << "no field index supplied and field count != 1" << endl;
+                    throw std::runtime_error(merr.str());
                 } else {
                     index = 0;
                 }
@@ -340,7 +361,9 @@ VariantFieldType Variant::infoType(string& key) {
                     return b->second.at(index);
                 }
             } else {
-                cerr << "not string type " << key << endl;
+                std::ostringstream merr;
+                merr << "not string type " << key << endl;
+                throw std::runtime_error(merr.str());
             }
         }
     }
@@ -348,8 +371,9 @@ VariantFieldType Variant::infoType(string& key) {
     double Variant::getSampleValueFloat(string& key, string& sample, int index) {
         map<string, VariantFieldType>::iterator s = vcf->formatTypes.find(key);
         if (s == vcf->formatTypes.end()) {
-            cerr << "no format field " << key << endl;
-            exit(1);
+            std::ostringstream merr;
+            merr << "no format field " << key << endl;
+            throw std::runtime_error(merr.str());
         } else {
             // XXX TODO wrap this with a function call
             int count = vcf->formatCounts[key];
@@ -359,8 +383,9 @@ VariantFieldType Variant::infoType(string& key) {
             }
             if (index == INDEX_NONE) {
                 if (count != 1) {
-                    cerr << "no field index supplied and field count != 1" << endl;
-                    exit(1);
+                    std::ostringstream merr;
+                    merr << "no field index supplied and field count != 1" << endl;
+                    throw std::runtime_error(merr.str());
                 } else {
                     index = 0;
                 }
@@ -373,12 +398,15 @@ VariantFieldType Variant::infoType(string& key) {
                     return false;
                 double r;
                 if (!convert(b->second.at(index), r)) {
-                    cerr << "could not convert field " << key << "=" << b->second.at(index) << " to " << type << endl;
-                    exit(1);
+                    std::ostringstream merr;
+                    merr << "could not convert field " << key << "=" << b->second.at(index) << " to " << type << endl;
+                    throw std::runtime_error(merr.str());
                 }
                 return r;
             } else {
-                cerr << "unsupported type for sample " << type << endl;
+                std::ostringstream merr;
+                merr << "unsupported type for sample " << type << endl;
+                throw std::runtime_error(merr.str());
             }
         }
     }
@@ -410,8 +438,9 @@ VariantFieldType Variant::infoType(string& key) {
     int Variant::getAltAlleleIndex(string& allele) {
         map<string, int>::iterator f = altAlleleIndexes.find(allele);
         if (f == altAlleleIndexes.end()) {
-            cerr << "no such allele \'" << allele << "\' in record " << sequenceName << ":" << position << endl;
-            exit(1);
+            std::ostringstream merr;
+            merr << "no such allele \'" << allele << "\' in record " << sequenceName << ":" << position << endl;
+            throw std::runtime_error(merr.str());
         } else {
             return f->second;
         }
@@ -520,7 +549,6 @@ VariantFieldType Variant::infoType(string& key) {
         while (!tokens.empty()) {
             RuleToken& token = tokens.front();
             if (isOperator(token)) {
-                //cerr << "found operator " << token.value << endl;
                 while (ops.size() > 0 && isOperator(ops.top())
                        && (   (isLeftAssociative(token)  && priority(token) <= priority(ops.top()))
                               || (isRightAssociative(token) && priority(token) <  priority(ops.top())))) {
@@ -529,31 +557,30 @@ VariantFieldType Variant::infoType(string& key) {
                 }
                 ops.push(token);
             } else if (isLeftParenthesis(token)) {
-                //cerr << "found paran " << token.value << endl;
                 ops.push(token);
             } else if (isRightParenthesis(token)) {
-                //cerr << "found paran " << token.value << endl;
                 while (ops.size() > 0 && !isLeftParenthesis(ops.top())) {
                     prefixtokens.push(ops.top());
                     ops.pop();
                 }
                 if (ops.size() == 0) {
-                    cerr << "error: mismatched parentheses" << endl;
-                    exit(1);
+                    std::ostringstream merr;
+                    merr << "error: mismatched parentheses" << endl;
+                    throw std::runtime_error(merr.str());
                 }
                 if (isLeftParenthesis(ops.top())) {
                     ops.pop();
                 }
             } else {
-                //cerr << "found operand " << token.value << endl;
                 prefixtokens.push(token);
             }
             tokens.pop();
         }
         while (ops.size() > 0) {
             if (isRightParenthesis(ops.top()) || isLeftParenthesis(ops.top())) {
-                cerr << "error: mismatched parentheses" << endl;
-                exit(1);
+                std::ostringstream merr;
+                merr << "error: mismatched parentheses" << endl;
+                throw std::runtime_error(merr.str());
             }
             prefixtokens.push(ops.top());
             ops.pop();
@@ -650,13 +677,6 @@ VariantFieldType Variant::infoType(string& key) {
         spec = filterspec;
         tokenizeFilterSpec(filterspec, tokens, variables);
         infixToPrefix(tokens, rules);
-        /*while (!rules.empty()) {
-          cerr << " " << rules.front().value << ((isNumeric(rules.front())) ? "f" : "");
-          rules.pop();
-          }
-        */
-        //cerr << endl;
-        //cerr << join(" ", tokens) << endl;
     }
 
 // all alts pass
@@ -702,49 +722,40 @@ VariantFieldType Variant::infoType(string& key) {
                     vtype = var.infoType(token.value);
                 } else {
                     vtype = var.formatType(token.value);
-                    //cout << "type = " << type << endl;
                 }
-                //cout << "type: " << type << endl;
 
                 if (vtype == FIELD_INTEGER || vtype == FIELD_FLOAT) {
                     token.type = RuleToken::NUMERIC_VARIABLE;
                     token.number = var.getValueFloat(token.value, sample, index);
-                    //cerr << "number: " << token.number << endl;
                 } else if (vtype == FIELD_BOOL) {
                     token.type = RuleToken::BOOLEAN_VARIABLE;
                     token.state = var.getValueBool(token.value, sample, index);
-                    //cerr << "state: " << token.state << endl;
                 } else if (vtype == FIELD_STRING) {
-                    //cout << "token.value = " << token.value << endl;
                     token.type = RuleToken::STRING_VARIABLE;
                     token.str = var.getValueString(token.value, sample, index);
                 } else if (isString(token)) {
                     token.type = RuleToken::STRING_VARIABLE;
                     token.str = var.getValueString(token.value, sample, index);
-                    //cerr << "string: " << token.str << endl;
                 }
             } else {
                 double f;
                 string s;
-                //cerr << "parsing operand" << endl;
                 if (convert(token.value, f)) {
                     token.type = RuleToken::NUMERIC_VARIABLE;
                     token.number = f;
-                    //cerr << "number: " << token.number << endl;
                 } else if (convert(token.value, s)) {
                     token.type = RuleToken::STRING_VARIABLE;
                     token.str = s;
-                    //cerr << "string: " << token.str << endl;
                 } else {
-                    cerr << "could not parse non-variable operand " << token.value << endl;
-                    exit(1);
+                    std::ostringstream merr;
+                    merr << "could not parse non-variable operand " << token.value << endl;
+                    throw std::runtime_error(merr.str());
                 }
             }
             results.push(token);
         } 
         // apply operators to the first n elements on the stack and push the result back onto the stack
         else if (isOperator(token)) {
-            //cerr << "is operator: " << token.value << endl;
             RuleToken a, b, r;
             // is it a not-operator?
             switch (token.type) {
@@ -752,7 +763,9 @@ VariantFieldType Variant::infoType(string& key) {
                     a = results.top();
                     results.pop();
                     if (!isBoolean(a)) {
-                        cerr << "cannot negate a non-boolean" << endl;
+                        std::ostringstream merr;
+                        merr << "cannot negate a non-boolean" << endl;
+                        throw std::runtime_error(merr.str());
                     } else {
                         a.state = !a.state;
                         results.push(a);
@@ -774,8 +787,9 @@ VariantFieldType Variant::infoType(string& key) {
                                 r.state = (a.state == b.state);
                                 break;
                             default:
-                                cerr << "should not get here" << endl; exit(1);
-                                break;
+                                std::ostringstream merr;
+                                merr << "should not get here" << endl;
+                                throw std::runtime_error(merr.str());
                         }
                     }
                     results.push(r);
@@ -787,9 +801,10 @@ VariantFieldType Variant::infoType(string& key) {
                     if (a.type == b.type && a.type == RuleToken::NUMERIC_VARIABLE) {
                         r.state = (b.number > a.number);
                     } else {
-                        cerr << "cannot compare (>) objects of dissimilar types" << endl;
-			;                        cerr << a.type << " " << b.type << endl;
-                        exit(1);
+                        std::ostringstream merr;
+                        merr << "cannot compare (>) objects of dissimilar types" << endl;
+                        merr << a.type << " " << b.type << endl;
+                        throw std::runtime_error(merr.str());
                     }
                     results.push(r);
                     break;
@@ -800,9 +815,10 @@ VariantFieldType Variant::infoType(string& key) {
                     if (a.type == b.type && a.type == RuleToken::NUMERIC_VARIABLE) {
                         r.state = (b.number < a.number);
                     } else {
-                        cerr << "cannot compare (<) objects of dissimilar types" << endl;
-                        cerr << a.type << " " << b.type << endl;
-                        exit(1);
+                        std::ostringstream merr;
+                        merr << "cannot compare (<) objects of dissimilar types" << endl;
+                        merr << a.type << " " << b.type << endl;
+                        throw std::runtime_error(merr.str());
                     }
                     results.push(r);
                     break;
@@ -814,9 +830,10 @@ VariantFieldType Variant::infoType(string& key) {
                         r.number = (b.number + a.number);
                         r.type = RuleToken::NUMERIC_VARIABLE;
                     } else {
-                        cerr << "cannot add objects of dissimilar types" << endl;
-                        cerr << a.type << " " << b.type << endl;
-                        exit(1);
+                        std::ostringstream merr;
+                        merr << "cannot add objects of dissimilar types" << endl;
+                        merr << a.type << " " << b.type << endl;
+                        throw std::runtime_error(merr.str());
                     }
                     results.push(r);
                     break;
@@ -828,9 +845,10 @@ VariantFieldType Variant::infoType(string& key) {
                         r.number = (b.number - a.number);
                         r.type = RuleToken::NUMERIC_VARIABLE;
                     } else {
-                        cerr << "cannot subtract objects of dissimilar types" << endl;
-                        cerr << a.type << " " << b.type << endl;
-                        exit(1);
+                        std::ostringstream merr;
+                        merr << "cannot subtract objects of dissimilar types" << endl;
+                        merr << a.type << " " << b.type << endl;
+                        throw std::runtime_error(merr.str());
                     }
                     results.push(r);
                     break;
@@ -842,9 +860,10 @@ VariantFieldType Variant::infoType(string& key) {
                         r.number = (b.number * a.number);
                         r.type = RuleToken::NUMERIC_VARIABLE;
                     } else {
-                        cerr << "cannot multiply objects of dissimilar types" << endl;
-                        cerr << a.type << " " << b.type << endl;
-                        exit(1);
+                        std::ostringstream merr;
+                        merr << "cannot multiply objects of dissimilar types" << endl;
+                        merr << a.type << " " << b.type << endl;
+                        throw std::runtime_error(merr.str());
                     }
                     results.push(r);
                     break;
@@ -856,9 +875,10 @@ VariantFieldType Variant::infoType(string& key) {
                         r.number = (b.number / a.number);
                         r.type = RuleToken::NUMERIC_VARIABLE;
                     } else {
-                        cerr << "cannot divide objects of dissimilar types" << endl;
-                        cerr << a.type << " " << b.type << endl;
-                        exit(1);
+                        std::ostringstream merr;
+                        merr << "cannot divide objects of dissimilar types" << endl;
+                        merr << a.type << " " << b.type << endl;
+                        throw std::runtime_error(merr.str());
                     }
                     results.push(r);
                     break;
@@ -874,14 +894,16 @@ VariantFieldType Variant::infoType(string& key) {
                             r.state = (a.state || b.state);
                         }
                     } else {
-                        cerr << "cannot compare (& or |) objects of dissimilar types" << endl;
-                        exit(1);
+                        std::ostringstream merr;
+                        merr << "cannot compare (& or |) objects of dissimilar types" << endl;
+                        throw std::runtime_error(merr.str());
                     }
                     results.push(r);
                     break;
                 default:
-                    cerr << "should not get here!" << endl; exit(1);
-                    break;
+                    std::ostringstream merr;
+                    merr << "should not get here!" << endl;
+                    throw std::runtime_error(merr.str());
             }
         }
     }
@@ -890,20 +912,22 @@ VariantFieldType Variant::infoType(string& key) {
         if (isBoolean(results.top())) {
             return results.top().state;
         } else {
-            cerr << "error, non-boolean value left on stack" << endl;
-            //cerr << results.top().value << endl;
-            exit(1);
+            std::ostringstream merr;
+            merr << "error, non-boolean value left on stack" << endl;
+            throw std::runtime_error(merr.str());
         }
     } else if (results.size() > 1) {
-        cerr << "more than one value left on results stack!" << endl;
+        std::ostringstream merr;
+        merr << "more than one value left on results stack!" << endl;
         while (!results.empty()) {
-            cerr << results.top().value << endl;
+            merr << results.top().value << endl;
             results.pop();
         }
-        exit(1);
+        throw std::runtime_error(merr.str());
     } else {
-        cerr << "results stack empty" << endl;
-        exit(1);
+        std::ostringstream merr;
+        merr << "results stack empty" << endl;
+        throw std::runtime_error(merr.str());
     }
 }
 
@@ -917,27 +941,6 @@ void VariantFilter::removeFilteredGenotypes(Variant& var) {
     }
 }
 
-/*
-bool VariantCallFile::openVCF(string& filename) {
-    file.open(filename.c_str(), ifstream::in);
-    if (!file.is_open()) {
-        cerr << "could not open " << filename << endl;
-        return false;
-    } else {
-        return parseHeader();
-    }
-}
-
-bool VariantCallFile::openVCF(ifstream& stream) {
-    file = stream;
-    if (!file.is_open()) {
-        cerr << "provided file is not open" << endl;
-        return false;
-    } else {
-        return parseHeader();
-    }
-}
-*/
 
 void VariantCallFile::updateSamples(vector<string>& newSamples) {
     sampleNames = newSamples;
@@ -1123,17 +1126,19 @@ bool VariantCallFile::parseHeader(string& hs) {
                 if (entryType == "INFO" || entryType == "FORMAT") {
                     vector<string> fields = split(entryData, "=,");
                     if (fields[0] != "ID") {
-                        cerr << "header parse error at:" << endl
+                        std::ostringstream merr;
+                        merr << "header parse error at:" << endl
                              << "fields[0] != \"ID\"" << endl
                              << headerLine << endl;
-                        exit(1);
+                        throw std::runtime_error(merr.str());
                     }
                     string id = fields[1];
                     if (fields[2] != "Number") {
-                        cerr << "header parse error at:" << endl
+                        std::ostringstream merr;
+                        merr << "header parse error at:" << endl
                              << "fields[2] != \"Number\"" << endl
                              << headerLine << endl;
-                        exit(1);
+                        throw std::runtime_error(merr.str());
                     }
                     int number;
                     string numberstr = fields[3].c_str();
@@ -1148,18 +1153,17 @@ bool VariantCallFile::parseHeader(string& hs) {
                         convert(numberstr, number);
                     }
                     if (fields[4] != "Type") {
-                        cerr << "header parse error at:" << endl
+                        std::ostringstream merr;
+                        merr << "header parse error at:" << endl
                              << "fields[4] != \"Type\"" << endl
                              << headerLine << endl;
-                        exit(1);
+                        throw std::runtime_error(merr.str());
                     }
                     VariantFieldType type = typeStrToVariantFieldType(fields[5]);
                     if (entryType == "INFO") {
                         infoCounts[id] = number;
                         infoTypes[id] = type;
-                        //cerr << id << " == " << type << endl;
                     } else if (entryType == "FORMAT") {
-                        //cout << "found format field " << id << " with type " << type << endl;
                         formatCounts[id] = number;
                         formatTypes[id] = type;
                     }
@@ -1231,8 +1235,9 @@ bool VariantCallFile::setRegion(string seq, long int start, long int end) {
 
 bool VariantCallFile::setRegion(string region) {
     if (!usingTabix) {
-        cerr << "cannot setRegion on a non-tabix indexed file" << endl;
-        exit(1);
+        std::ostringstream merr;
+        merr << "cannot setRegion on a non-tabix indexed file" << endl;
+        throw std::runtime_error(merr.str());
     }
     size_t dots = region.find("..");
     // convert between bamtools/freebayes style region string and tabix/samtools style
@@ -1457,14 +1462,15 @@ map<string, vector<VariantAllele> > Variant::parsedAlternates(bool includePrevio
         vector<pair<int, string> > cigarData = splitCigar(cigar);
         if (cigarData.front().second != "M" || cigarData.back().second != "M"
             || cigarData.front().first < paddingLen || cigarData.back().first < paddingLen) {
-            cerr << "parsedAlternates: alignment does not start with match over padded sequence" << endl;
-            cerr << cigar << endl;
-            cerr << reference_M << endl;
-            cerr << alternateQuery_M << endl;
-            exit(1);
+            std::ostringstream merr;
+            merr << "parsedAlternates: alignment does not start with match over padded sequence" << endl;
+            merr << cigar << endl;
+            merr << reference_M << endl;
+            merr << alternateQuery_M << endl;
+            throw std::runtime_error(merr.str());
         } else {
             cigarData.front().first -= paddingLen;
-            cigarData.back().first -= paddingLen;;
+            cigarData.back().first -= paddingLen;
         }
         cigar = joinCigar(cigarData);
 
@@ -1753,8 +1759,9 @@ string unionInfoHeaderLines(string& s1, string& s2) {
         result.push_back(*s);
     }
     if (lastHeaderLine.empty()) {
-        cerr << "could not find CHROM POS ... header line" << endl;
-        exit(1);
+        std::ostringstream merr;
+        merr << "could not find CHROM POS ... header line" << endl;
+        throw std::runtime_error(merr.str());
     }
     result.push_back(lastHeaderLine);
     return join(result, "\n");

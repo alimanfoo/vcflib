@@ -329,7 +329,7 @@ inline int priority(const RuleToken& token) {
         case ( RuleToken::OR_OPERATOR )           : return 3;
         case ( RuleToken::LEFT_PARENTHESIS )      : return 0;
         case ( RuleToken::RIGHT_PARENTHESIS )     : return 0;
-        default: cerr << "invalid token type" << endl; exit(1);
+        default: throw std::runtime_error("invalid token type");
     }
 }
 
